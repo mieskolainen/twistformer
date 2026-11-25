@@ -1,0 +1,20 @@
+# Synthetic classification parameter scan
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+name: Synthetic CPU validation
+config: ../synthetic/classification.yml
+parameters:
+  training.learning_rate: [0.0003, 0.001]
+  model.width: [16, 32]
+  model.depth: [1]
+  training.epochs: [4]
+  training.device: [cpu]
+  training.workers: [0]
+  driver.train_size: [48]
+  driver.val_size: [24]
+  driver.max_tokens: [8]
+seeds: [11, 12]
+objective:
+  metric: val_loss
+  mode: min

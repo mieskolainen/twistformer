@@ -1,0 +1,7 @@
+# Trigonometric probability path
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+flow:
+  path: COS-CFM

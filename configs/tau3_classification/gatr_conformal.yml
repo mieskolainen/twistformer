@@ -1,0 +1,30 @@
+# Geometric-algebra transformer steering
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: gatr_projective.yml
+model:
+  gatr_algebra: conformal
+  # Use 200 mm units to limit cancellation in conformal metric contractions
+  gatr_input_scale: 0.005
+  # Subtract the unweighted hit centroid after the common scale
+  gatr_center: true
+
+training:
+  # Reduce parameter steps near null geometric norms
+  learning_rate: 0.0001
+  # Use FP32 for conformal geometry, attention and the task head
+  amp: false
+  # Keep full mantissa precision in FP32 metric contractions
+  tf32: false
+
+task:
+  lossfunc: cross_entropy
+  balance_classes: true
+
+preprocessing:
+  # Raw x,y,z [mm], common gatr_input_scale before algebra embedding
+  # No per-axis z-scores, auxiliary E stays raw in GeV
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

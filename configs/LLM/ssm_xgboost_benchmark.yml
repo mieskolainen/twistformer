@@ -1,0 +1,121 @@
+# Causal language benchmark with state-space and XGBoost models
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+# Run with configs/LLM/run.py
+name: scientific_text_completion
+
+data:
+  # One document per JSONL record with document_id and text
+  # Resolve file paths relative to this YAML file
+  files:
+    train: data/train.jsonl
+    booster_train: data/booster_train.jsonl
+    validation: data/validation.jsonl
+    test: data/test.jsonl
+  split_unit: document
+  deduplicate_before_split: true
+  tokenizer:
+    family: byte_level_bpe
+    vocabulary_size: 8192
+    fit_split: train
+  context_tokens: 1024
+
+models:
+  transformer:
+    family: causal_transformer
+    width: 512
+    layers: 19
+    heads: 8
+  ssm:
+    family: mamba2
+    attention_layers: 0
+    width: 512
+    layers: 36
+    head_dim: 64
+    state_size: 64
+    chunk_size: 32
+  ssm_xgboost:
+    backbone: ssm
+    freeze_backbone: true
+    experts: [local, recurrence, structure]
+
+training:
+  # Pilot targets for both backbone models
+  parameters_per_backbone: 64000000
+  training_tokens_per_backbone: 100000000
+  batch_size: 8
+  learning_rate: 0.0003
+  objective: next_token_cross_entropy
+  train_split: train
+  selection_split: validation
+  seeds: [101, 202, 303]
+
+boosters:
+  fit_split: booster_train
+  max_fit_prefixes: 50000
+  context: prefix_only
+  candidates:
+    source: backbone_top_k
+    top_k: 32
+    label: candidate_is_observed_next_token
+    exclude_prefix_from_fit_if_target_missing: true
+  experts:
+    local:
+      features: [backbone_log_probability, backbone_rank, suffix_ngram_counts]
+      ngram_orders: [2, 3, 4, 5]
+      count_split: train
+      max_count_tokens: 500000
+    recurrence:
+      features: [backbone_log_probability, prior_token_count, distance_to_last_occurrence,
+                 previous_matching_suffix_length, matches_after_same_suffix]
+    structure:
+      features: [backbone_log_probability, open_delimiter_depth, closes_open_delimiter,
+                 equation_or_citation_state, identifier_prefix_match]
+  xgboost:
+    objective: binary:logistic
+    tree_method: hist
+    max_depth: 5
+    eta: 0.03
+    max_bin: 128
+    min_child_weight: 16
+    reg_lambda: 5
+    subsample: 0.8
+    colsample_bytree: 0.8
+    boosting_rounds: 400
+
+blend:
+  # Add weighted expert margins to the backbone log probabilities on the shortlist
+  # Normalize within the shortlist and restore its original total probability mass
+  # The backbone probabilities outside the shortlist complete the distribution
+  method: shortlist_logit_residual
+  fit_split: validation
+  max_fit_prefixes: 15000
+  fit_metric: full_vocabulary_next_token_nll
+  expert_weight_bounds: [0.0, 1.0]
+
+evaluation:
+  split: test
+  metrics:
+    - next_token_perplexity
+    - next_token_top1_accuracy
+    - equation_completion_exact_match
+    - citation_completion_exact_match
+    - candidate_target_recall_at_32
+    - prefill_latency_ms
+    - generated_tokens_per_second
+    - peak_memory_bytes
+  generation:
+    # Use the same prompt and target span from each held-out document for every model
+    prompt_spans: [equation, citation]
+    decoding: greedy
+    completion_rule: end_of_span_or_token_limit
+    max_new_tokens: 64
+    max_examples_per_kind: 16
+    batch_size: 1
+  compare_at_same_precision_and_hardware: true
+  report_all_training_tokens_and_compute: true
+
+references:
+  state_space_comparison: https://arxiv.org/abs/2406.07887
+  retrieval_language_model: https://arxiv.org/abs/1911.00172

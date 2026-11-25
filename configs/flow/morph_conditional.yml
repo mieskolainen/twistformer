@@ -1,0 +1,14 @@
+# Conditional transport of supplied event pairs
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+driver:
+  parameters: [class]
+  files:
+    train: data/flow/morph_train.npz
+    val: data/flow/morph_val.npz
+    test: data/flow/morph_test.npz
+flow:
+  mode: morph-conditional
+  condition: parameters

@@ -1,0 +1,47 @@
+# Histogram trees for binary event classification
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+model:
+  family: xgboost
+  depth: 12  # max_depth
+  xgboost_threads: 0  # Maximum available CPU threads
+  xgboost_sketch_rows: 0  # Use all training rows for histogram boundaries
+  xgboost_params:
+    booster: gbtree
+    objective: binary:logistic
+    tree_method: hist
+    reg_alpha: 0.0        # L1 penalty on leaf scores
+    reg_lambda: 1.0       # L2 penalty on leaf scores
+    gamma: 0.0            # Minimum loss reduction per split
+    grow_policy: lossguide
+    max_leaves: 96
+    min_child_weight: 8.0
+    subsample: 0.85
+    colsample_bytree: 0.4
+    colsample_bylevel: 1.0
+    colsample_bynode: 0.7
+    num_parallel_tree: 1
+    max_bin: 64
+
+preprocessing:
+  normalize_features: false
+  normalize_globals: false
+
+calibration:
+  temperature_scaling: false
+
+training:
+  epochs: 1500  # Maximum boosting rounds
+  patience: 200
+  learning_rate: 0.05
+  monitor: val_loss
+  mode: min
+  scheduler: none  # Optional cosine, cosine_restarts, thirds or plateau
+  warmup_epochs: 0
+  token_dropout: 0
+  device: auto  # cpu, cuda or auto
+  workers: 0
+  amp: false
+  compile: false
+  pin_memory: false

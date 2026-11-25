@@ -1,0 +1,176 @@
+<!doctype html>
+<!-- Experiment dashboard
+     mikael.mieskolainen@cern.ch (2026) -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Twistboard</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/dashboard.js" defer></script>
+  <script src="/comparisons.js" defer></script>
+  <script src="/explorer.js" defer></script>
+</head>
+<body>
+<header><a class="brand" href="/"><span>twistboard</span></a><nav class="header-actions" aria-label="Dashboard views"><button id="open-comparisons" class="command-button" type="button">Compare models</button><button id="open-scans" class="command-button" type="button">Scans and metrics</button></nav><span id="connection" role="status">Connecting</span></header>
+<div id="action-notification" hidden>
+  <p id="action-message" role="status" aria-atomic="true"></p>
+  <button id="action-close" type="button" aria-label="Dismiss notification" title="Dismiss notification"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+</div>
+<div class="layout">
+  <div id="sidebar-resize" role="separator" aria-label="Resize experiment sidebar" aria-orientation="vertical" aria-controls="experiment-sidebar" tabindex="0" title="Drag to resize. Use arrow keys to adjust. Double-click to reset."></div>
+  <button id="sidebar-toggle" type="button" aria-label="Hide experiments" title="Hide experiments" aria-controls="experiment-sidebar" aria-expanded="true"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d="m10 4-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <aside id="experiment-sidebar"><div class="aside-title"><h2>Experiments</h2><span id="count" class="pill">0</span></div><input id="search" type="search" placeholder="Filter name, model or task" aria-label="Filter experiments"><nav id="runs" aria-label="Experiments"></nav></aside>
+  <main id="main">
+    <div id="empty" class="empty"><h1>No experiments</h1></div>
+    <article id="scan-view" hidden>
+      <h1>Scans and metrics</h1>
+      <div class="scan-controls">
+        <label>Driver<select id="scan-driver"></select></label>
+        <label>Group<select id="scan-group"></select></label>
+        <label>Status<select id="scan-status"><option value="">All statuses</option><option>trained</option><option>training</option><option>failed</option><option>interrupted</option><option>stale</option><option>queued</option></select></label>
+        <label>Metric<select id="scan-metric"></select></label>
+        <label>Value<select id="scan-reduce"><option value="latest">Latest</option><option value="best">Best</option><option value="budget">At optimizer step</option></select></label>
+        <label id="scan-budget-label" hidden>Optimizer steps (k)<input id="scan-budget" type="number" min="0" step="0.001" value="1" required></label>
+        <label>Direction<select id="scan-mode"><option value="min">Minimize</option><option value="max">Maximize</option></select></label>
+      </div>
+      <section>
+        <div class="scan-controls">
+          <label>Plot<select id="scan-plot"><option value="scatter">Parameter vs metric</option><option value="parallel">Parallel coordinates</option><option value="heatmap">Parameter pair heatmap</option><option value="distribution">Metric distribution</option></select></label>
+          <label id="scan-x-label">Parameter X<select id="scan-x"></select></label>
+          <label id="scan-y-label">Parameter Y / colour<select id="scan-y"></select></label>
+          <button id="scan-clear" class="command-button" type="button">Clear range filters</button>
+        </div>
+        <label id="scan-axis-label">Parallel axes, up to seven<select id="scan-axes" multiple size="4"></select></label>
+        <p id="scan-summary" class="subtle" role="status"></p>
+        <p id="scan-filters" class="subtle"></p>
+        <div class="scan-canvas-wrap"><canvas id="scan-canvas" role="img" aria-label="Hyperparameter scan plot" tabindex="0"></canvas><canvas id="scan-highlight" aria-hidden="true"></canvas><div id="scan-axis-buttons"></div></div>
+        <div id="scan-colors" class="scan-colors"></div>
+        <div class="scan-details" role="region" aria-label="Hovered trial details"><div id="scan-tooltip" class="scan-tooltip" hidden></div><p class="scan-hover-hint subtle">Hover over a trial to inspect its values</p></div>
+        <p class="subtle">Hover for values. Click a trial to select it. Click a numeric axis name to switch between linear and log scales. Log scales show positive values only. Drag on scatter coordinates or a parallel axis to filter. Click a heatmap cell or distribution to filter its parameters.</p>
+      </section>
+      <section>
+        <h2>Trials</h2>
+        <p id="scan-selection" class="subtle"></p>
+        <button id="scan-unselect" class="command-button" type="button">Clear selected trials</button>
+        <div id="scan-table" class="table-wrap"></div>
+        <div class="scan-pager"><button id="scan-prev" class="command-button" type="button">Previous</button><span id="scan-page"></span><button id="scan-next" class="command-button" type="button">Next</button></div>
+      </section>
+      <section>
+        <h2>Selected learning curves</h2>
+        <label>Horizontal axis<select id="scan-time"><option value="step">Optimizer steps (k)</option><option value="epoch">Epoch</option><option value="elapsed_seconds">Total training time (s)</option></select></label>
+        <div class="scan-canvas-wrap"><canvas id="scan-curves" role="img" aria-label="Selected trial learning curves"></canvas></div>
+        <div id="scan-legend" class="subtle"></div>
+      </section>
+    </article>
+    <article id="comparison-view" hidden>
+      <h1>Model comparisons</h1>
+      <section data-block="comparison-checkpoints"><h2>Selected checkpoints</h2><p class="subtle">Use Compare beside checkpoints in the experiment view. The first selected checkpoint defines the common test sample. Run comparison starts the job on the Twistboard host.</p><div id="comparison-checkpoints"></div><button id="comparison-run" class="command-button" type="button" disabled>Run comparison</button> <button id="comparison-card" class="command-button" type="button" disabled>Download comparison card</button><pre id="comparison-command" hidden></pre></section>
+      <section data-block="comparison-results"><h2>Saved comparisons</h2><div class="comparison-controls"><label>Comparison <select id="comparison-choice"></select></label><button id="comparison-refresh" class="command-button" type="button">Refresh</button><label>Selection <select id="comparison-selection"></select></label><label>Reference <select id="comparison-reference"></select></label><label><span id="comparison-output-label">Class</span> <select id="comparison-class"></select></label><label>Plot <select id="comparison-plot"><option value="roc">ROC</option><option value="rejection">Background rejection</option><option value="precision_recall">Precision–recall</option><option value="calibration">Calibration</option></select></label></div><p id="comparison-status" role="status"></p><div id="comparison-models" class="comparison-controls"></div><div id="comparison-table" class="table-wrap"></div><div id="comparison-chart" class="curve"></div><div class="curve-controls"><div class="axis-control"><span>X axis</span><div id="comparison-x" class="axis-toggle" role="group" aria-label="Comparison X axis scale" data-scale="linear"><button type="button" data-scale="linear" aria-pressed="true">Linear</button><button type="button" data-scale="log10" aria-pressed="false">Log10</button></div></div><div class="axis-control"><span>Y axis</span><div id="comparison-y" class="axis-toggle" role="group" aria-label="Comparison Y axis scale" data-scale="linear"><button type="button" data-scale="linear" aria-pressed="true">Linear</button><button type="button" data-scale="log10" aria-pressed="false">Log10</button></div></div><button id="comparison-enlarge" class="command-button" type="button">Enlarge</button></div><div id="comparison-downloads" class="file-list"></div><details><summary>Comparison log</summary><pre id="comparison-log"></pre></details></section>
+    </article>
+    <article id="detail" hidden>
+      <div class="eyebrow" id="kind"></div><div class="title-row"><h1 id="name"></h1><span id="status" class="pill"></span></div>
+      <div class="run-meta-row">
+        <p class="subtle run-times" id="created"></p>
+        <button id="delete-run" class="delete-button" type="button" disabled>Delete experiment</button>
+      </div>
+      <div id="cards" class="cards"></div>
+      <section data-block="loss"><div class="section-head"><h2>Loss by epoch</h2><div class="legend"><span class="train">Training</span><span class="val">Validation</span></div></div>
+        <div id="curve" class="curve"></div><p id="curve-note" class="subtle" role="status" hidden></p>
+        <div class="curve-controls">
+          <div class="axis-control"><span>X axis</span>
+            <div id="loss-x-scale" class="axis-toggle" role="group" aria-label="Loss X axis scale" data-scale="linear">
+              <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
+              <button type="button" data-scale="log10" aria-pressed="false">Log10</button>
+            </div>
+          </div>
+          <div class="axis-control"><span>Y axis</span>
+            <div id="loss-y-scale" class="axis-toggle" role="group" aria-label="Loss Y axis scale" data-scale="linear">
+              <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
+              <button type="button" data-scale="log10" aria-pressed="false">Log10</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section data-block="observables"><h2>Training observables</h2><div class="scan-controls"><label>Metric<select id="observable-metric"></select></label><label>Horizontal axis<select id="observable-axis"><option value="step">Optimizer steps (k)</option><option value="epoch">Epoch</option><option value="elapsed_seconds">Total training time (s)</option></select></label></div>
+        <div id="observable-curve" class="curve"></div><p id="observable-curve-note" class="subtle" role="status" hidden></p>
+        <div class="curve-controls">
+          <div class="axis-control"><span>X axis</span>
+            <div id="observable-x-scale" class="axis-toggle" role="group" aria-label="Observable X axis scale" data-scale="linear">
+              <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
+              <button type="button" data-scale="log10" aria-pressed="false">Log10</button>
+            </div>
+          </div>
+          <div class="axis-control"><span>Y axis</span>
+            <div id="observable-y-scale" class="axis-toggle" role="group" aria-label="Observable Y axis scale" data-scale="linear">
+              <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
+              <button type="button" data-scale="log10" aria-pressed="false">Log10</button>
+            </div>
+          </div>
+        </div>
+        <p id="observable-note" class="subtle" hidden></p><details><summary>Training messages</summary><div id="observable-events" class="table-wrap"></div></details></section>
+      <section data-block="checkpoints"><h2>Checkpoints</h2><p id="selection" class="subtle"></p><div class="table-wrap checkpoint-table" tabindex="0" role="region" aria-label="Checkpoints"><table><thead><tr><th>Checkpoint</th><th>Epoch</th><th>Selection metric</th><th>Size</th><th class="checkpoint-action">Actions</th></tr></thead><tbody id="checkpoints"></tbody></table></div></section>
+      <section id="feature-importance" data-block="feature-importance" hidden>
+        <h2>Feature importance</h2>
+        <div class="scan-controls">
+          <label>Checkpoint<select id="importance-checkpoint"></select></label>
+          <label>Filter features<input id="importance-filter" type="search"></label>
+          <div id="importance-files" class="file-list"></div>
+        </div>
+        <div class="comparison-controls importance-pages">
+          <button id="importance-prev" type="button" class="command-button">Previous</button>
+          <button id="importance-next" type="button" class="command-button">Next</button>
+          <p id="importance-status" class="subtle" role="status"></p>
+        </div>
+        <div id="importance-table" class="table-wrap" tabindex="0" role="region" aria-label="Features ranked by total gain"><table><thead><tr><th scope="col">Rank</th><th scope="col">Feature</th><th scope="col">Total gain</th></tr></thead><tbody id="importance-rows"></tbody></table></div>
+      </section>
+      <section id="training-distributions" data-block="training-distributions" hidden>
+        <h2>Training variable distributions</h2>
+        <div class="scan-controls distribution-controls">
+          <label>Filter variables<input id="distribution-filter" type="search"></label>
+          <label>Variable<select id="distribution-feature"></select></label>
+          <label id="distribution-category-label">Category<select id="distribution-category"></select></label>
+          <label>Vertical axis<select id="distribution-scale"><option value="fraction">Fraction per class</option><option value="weight">Weighted events</option></select></label>
+        </div>
+        <p id="distribution-status" class="subtle" role="status"></p>
+        <div id="distribution-legend" class="distribution-legend"></div>
+        <div id="distribution-plot" class="distribution-plot"></div>
+        <div class="curve-controls">
+          <div class="axis-control"><span>X axis</span>
+            <div id="distribution-x-scale" class="axis-toggle" role="group" aria-label="Training distribution X axis scale" data-scale="linear">
+              <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
+              <button type="button" data-scale="log10" aria-pressed="false">Log10</button>
+            </div>
+          </div>
+          <div class="axis-control"><span>Y axis</span>
+            <div id="distribution-y-scale" class="axis-toggle" role="group" aria-label="Training distribution Y axis scale" data-scale="linear">
+              <button type="button" data-scale="linear" aria-pressed="true">Linear</button>
+              <button type="button" data-scale="log10" aria-pressed="false">Log10</button>
+            </div>
+          </div>
+        </div>
+        <p id="distribution-axis-note" class="subtle" hidden></p>
+      </section>
+      <section data-block="evaluation"><h2>Evaluation</h2><div id="evaluations"></div><div id="gallery" class="gallery"></div><div id="evaluation-metrics"></div><div id="evaluation-actions" class="evaluation-actions"></div></section>
+      <section data-block="run-details"><h2>Run details</h2><details><summary>Training command</summary><div id="training-commands"></div></details><details><summary>Resolved configuration</summary><pre id="configuration"></pre></details><details><summary>Training log</summary><pre id="log"></pre></details><details><summary>All files</summary><div id="files" class="file-list"></div></details></section>
+    </article>
+    <footer class="site-footer">mikael.mieskolainen@cern.ch (2026)</footer>
+  </main>
+</div>
+<dialog id="figure-viewer" aria-label="Figure preview" aria-describedby="figure-caption">
+  <button id="figure-close" type="button" aria-label="Close figure" title="Close figure (Esc)" autofocus><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+  <img id="figure-image" alt="">
+  <p id="figure-caption"></p>
+</dialog>
+<dialog id="command-viewer" aria-labelledby="command-title" aria-describedby="command-help">
+  <h2 id="command-title">Evaluation command</h2>
+  <p id="command-help" class="subtle">Run from the directory where Twistboard was started on the training host. Results are saved in a new evaluation folder.</p>
+  <textarea id="evaluation-command" readonly rows="4" aria-label="Evaluation command" spellcheck="false"></textarea>
+  <div class="command-actions">
+    <span id="command-copy-status" role="status"></span>
+    <button id="command-copy" class="command-button" type="button">Copy command</button>
+    <button id="command-close" class="command-button" type="button">Close</button>
+  </div>
+</dialog>
+</body>
+</html>

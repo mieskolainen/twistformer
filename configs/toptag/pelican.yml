@@ -1,0 +1,51 @@
+# Top tagging with the Lorentz-invariant PELICAN encoder
+# PELICAN: https://arxiv.org/abs/2211.00454
+# PELICAN architecture: https://arxiv.org/abs/2307.16506
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+
+driver:
+  # No random azimuthal rotation during training
+  rotate: false
+
+model:
+  family: pelican
+  width: 132
+  heads: 4
+  depth: 5
+  dropout: 0.025
+  norm: rms
+  pelican_message_width: 78
+  pelican_activation: leaky_relu
+  pelican_average_nobj: 49.0
+  pelican_momentum_scale: 1.0
+  auxiliary_features: []
+  pelican_factorize: true
+  pelican_multiplicity: true
+  pelican_triangle: false
+  head_norm: none
+  head_layers: 0
+preprocessing:
+  # No auxiliary features, feature tensor is unused
+  # Separate physical p4 supplies the Lorentz-invariant Gram matrix
+  # Gram_ij = s^2 (E_i E_j - vecp_i.vecp_j), s=pelican_momentum_scale
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false
+training:
+  learning_rate: 0.001
+  weight_decay: 0.005
+  scheduler: cosine_restarts
+  warmup_epochs: 4
+  grad_clip: 1.0
+  workers: 4
+  device: cuda
+  fused_optimizer: true
+  tf32: true
+  compile: true
+  compile_mode: default
+  token_dropout: 0.0
+  save_every: 5
+  keep_checkpoints: 3

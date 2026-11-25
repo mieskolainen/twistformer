@@ -1,0 +1,22 @@
+# Top-tag classifiers on a common test sample
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: ../toptag/evaluation.yml
+
+comparison:
+  name: toptag_models
+  dataset:
+    reference_checkpoint: runs/toptag-pelican-triangle-new/checkpoints/best.pt
+    split: test
+  models:
+    - label: PELICAN
+      checkpoint: runs/toptag-pelican-triangle-new/checkpoints/best.pt
+    - label: Twistformer
+      checkpoint: runs/toptag-twistor-new/checkpoints/best.pt
+  reference_model: PELICAN
+  device: auto
+  bootstrap_samples: 30
+  bootstrap_seed: 101
+  bootstrap_confidence: 0.6826894921370859
+  plots: true

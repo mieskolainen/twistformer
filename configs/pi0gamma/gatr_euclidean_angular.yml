@@ -1,0 +1,11 @@
+# Euclidean GATr with angular shower coordinates and fixed detector axes
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+# Inherit the angular Transformer classifier through the projective card
+include: gatr_projective_angular.yml
+
+model:
+  gatr_algebra: euclidean
+  # Retain radial depth relative to the ECAL inner surface
+  gatr_center: false

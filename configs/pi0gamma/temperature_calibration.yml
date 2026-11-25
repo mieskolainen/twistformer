@@ -1,0 +1,8 @@
+# Optional post-training fit on validation showers
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+calibration:
+  temperature_scaling: true
+  min_temperature: 0.05
+  max_temperature: 20.0

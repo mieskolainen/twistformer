@@ -1,0 +1,7 @@
+# Radial basis vector field
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+flow:
+  network: fastkan

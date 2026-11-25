@@ -1,0 +1,19 @@
+# Conditional tau momentum and displacement density
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: transformer.yml
+task:
+  name: flow_matching
+  lossfunc: flow_matching
+  mixture_components: 1
+flow:
+  type: continuous
+  mode: conditional
+  condition: encoder
+  shape: [6]
+  width: 128
+  depth: 4
+  steps: 32
+  trace_samples: 4
+  evaluation_samples: 64

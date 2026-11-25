@@ -1,0 +1,26 @@
+# Geometric-algebra transformer steering
+# GATr: https://arxiv.org/abs/2305.18415
+# E/P/C-GATr: https://arxiv.org/abs/2311.04744
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: gatr_projective.yml
+model:
+  gatr_algebra: conformal
+  gatr_input_scale: 0.01
+  # Keep uncentered momentum components
+  gatr_center: false
+
+training:
+  # Use FP32 for conformal geometry, attention and the task head
+  amp: false
+  # Keep full mantissa precision in FP32 metric contractions
+  tf32: false
+
+preprocessing:
+  # Spatial p4 components [GeV] use one common gatr_input_scale
+  # No per-axis z-scores, auxiliary E stays raw in GeV
+  # Euclidean spatial geometry does not impose Lorentz symmetry
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

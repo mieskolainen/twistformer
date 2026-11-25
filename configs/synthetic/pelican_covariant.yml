@@ -1,0 +1,48 @@
+# Covariant PELICAN four-vector regression on synthetic events
+# PELICAN: https://arxiv.org/abs/2211.00454
+# PELICAN architecture: https://arxiv.org/abs/2307.16506
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: synthetic
+  train_size: 256
+  val_size: 64
+  test_size: 64
+  max_tokens: 12
+  target_vectors: 1
+model:
+  family: pelican
+  width: 32
+  heads: 4
+  depth: 3
+  norm: rms
+  dropout: 0.025
+  pelican_average_nobj: 7.0
+  pelican_triangle: true
+  pelican_triangle_channels: 32
+  pelican_triangle_scale: 0.1
+  head_norm: rms
+  head_widths: [32]
+  head_activation: silu
+task:
+  name: covariant_regression
+  lossfunc: mse
+preprocessing:
+  normalize_features: false
+  # Physical E,px,py,pz components must retain their common scale and origin
+  normalize_targets: false
+training:
+  device: auto
+  epochs: 20
+  batch_size: 32
+  eval_batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.005
+  scheduler: cosine
+  warmup_epochs: 2
+  amp: true
+  amp_dtype: bf16
+evaluation:
+  bootstrap_samples: 30
+  batch_size: 2048

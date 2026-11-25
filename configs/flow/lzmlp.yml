@@ -1,0 +1,9 @@
+# Lipschitz vector field
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+flow:
+  network: lzmlp
+  layer_norm: true
+  lipschitz_weight: 0.0005

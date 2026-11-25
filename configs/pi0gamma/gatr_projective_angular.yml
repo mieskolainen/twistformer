@@ -1,0 +1,22 @@
+# Projective GATr with four angular shower features
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: gatr_projective_extended.yml
+
+driver:
+  feature_mode: angular
+
+model:
+  # Local coordinates use 50 mm units
+  gatr_input_scale: 1.0
+  auxiliary_features: [x, y, z, log_energy]
+
+  # Match the classifier in transformer_angular.yml
+  head_norm: rms
+  head_widths: []
+  head_layers: 3
+  head_expansion: 2
+  head_residual: true
+  head_dropout: 0.01
+  head_zero_init: true

@@ -1,0 +1,38 @@
+# Cluster PID evaluation in energy, angle and decay asymmetry bins
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+evaluation:
+  bootstrap_samples: 30
+  batch_size: 256
+  efficiencies: [0.30, 0.50, 0.90]
+
+  driver:
+    # Null uses the saved model checkpoint spectrum. 
+    # Set custom fractions for 5, 10, 20, 35, 50, 80, 100 GeV as an array []
+    # Meaningful for integrated metrics like "inclusive ROC", "overall accuracy" etc.
+    energy_weights: null
+  
+  categories:
+    # Sum of retained cell energies [GeV], same edges as truth_energy
+    - name: cluster_energy
+      observable: cluster_energy
+      edges: [0, 7.5, 15, 27.5, 42.5, 65, 90, 120]
+      overflow: true
+    # MC primary E [GeV], same seven gun bins as driver.energy_edges
+    - name: truth_energy
+      observable: truth_energy
+      edges: [0, 7.5, 15, 27.5, 42.5, 65, 90, 120]
+    - name: truth_theta
+      observable: truth_theta
+      edges: [40, 60, 80, 100, 120, 140]
+      overflow: true
+    # Bin generated pion decays and use all primary photons in each ROC
+    - name: pi0_decay_asymmetry
+      observable: pi0_decay_asymmetry
+      edges: [0, 0.25, 0.50, 0.75, 0.90, 0.95]
+      overflow: true
+    - name: n_cells
+      observable: n_cells
+      edges: [0, 32, 64, 128, 256, 512, 1024]
+      overflow: true

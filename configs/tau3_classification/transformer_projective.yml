@@ -1,0 +1,22 @@
+# Tau classification with projective distance attention
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: transformer.yml
+
+model:
+  attention: projective
+  projective_channels: 2
+  projective_coordinates: [x, y, z]
+  projective_input_scale: 0.001
+training:
+  epochs: 50
+  scheduler: cosine
+  warmup_epochs: 3
+preprocessing:
+  # Raw features, common projective_input_scale on x,y,z [mm]
+  # Scale enters both token embedding and distance attention
+  # Other feature channels stay raw, no per-axis z-scores
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

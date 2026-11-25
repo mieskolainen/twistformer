@@ -1,0 +1,37 @@
+# Projective geometric-algebra transformer for PID
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+
+model:
+  attention_backend: sdpa # sdpa, flex or auto
+  family: gatr
+  gatr_algebra: projective
+  width: 64
+  gatr_mv_channels: 8
+  heads: 4
+  depth: 6
+  expansion: 2
+  dropout: 0.01
+  attention_dropout: 0.0
+  gatr_input: coordinates
+  gatr_coordinates: [x, y, z]
+
+  # Local coordinates already use 50 mm units
+  gatr_input_scale: 1.0
+  gatr_center: false
+  
+  # Retain the theta, phi and depth axes and the ECAL inner surface
+  gatr_spurions: frame
+  gatr_projective_improved: true
+  gatr_reinsert: true
+  gatr_multi_query: true
+  gatr_global_token: false
+  gatr_checkpoint: false
+  gatr_readout: invariant
+  auxiliary_features: [x, y, z, log_energy, strip, energy_fraction, size_theta, size_phi]
+  pooling: mean
+  head_norm: rms
+  head_widths: [64]
+  head_activation: gelu

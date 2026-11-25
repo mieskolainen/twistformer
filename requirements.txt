@@ -1,0 +1,21 @@
+# Python 3.13 environment
+#
+# mikael.mieskolainen@cern.ch (2026)
+#
+# At CERN:
+# env -u PIP_CONSTRAINT PIP_CONFIG_FILE=/dev/null python -m pip install -r requirements.txt
+
+pip==26.3
+setuptools==84.2.1
+torch==2.15.0
+numpy==2.5.5
+xgboost==3.4.1
+PyYAML==6.0.3
+matplotlib==3.11.2
+h5py==3.16.0
+hdf5plugin==7.1.0
+uproot==5.7.7
+awkward==2.15.0
+tqdm==4.70.1
+pytest==9.2.0
+-e .[tau3_classification,tau3_regression,pi0gamma,toptag,xgboost,test]

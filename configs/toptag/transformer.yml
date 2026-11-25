@@ -1,0 +1,45 @@
+# Top tagging with Transformer
+# Transformer: https://arxiv.org/abs/1706.03762
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+
+driver:
+  feature_set: kinematics15
+  weight_column: null
+
+model:
+  family: transformer
+  attention: standard
+  pair_bias: jet
+  width: 64
+  depth: 4
+  heads: 4
+  expansion: 2
+  norm: rms
+  embedding: two_stage
+  embedding_norm: layer
+  ffn_activation: geglu
+  ffn_norm: none
+  head_norm: rms
+  head_layers: 1
+  head_expansion: 2
+  head_residual: true
+  head_dropout: 0.0
+  head_zero_init: true
+  # The archived single-layer FFN did not apply its configured 0.05 dropout
+  dropout: 0.0
+  embedding_dropout: 0.0
+  residual_dropout: 0.0
+  attention_dropout: 0.0
+  pooling: attention_query
+preprocessing:
+  # Raw kinematics15, including log and jet-relative channels
+  # No fitted z-scores, jet pair bias uses separate physical p4
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false
+training:
+  amp: false
+  amp_dtype: auto

@@ -1,0 +1,20 @@
+# Top tagging with projective distance attention
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: transformer.yml
+
+model:
+  attention: projective
+  projective_channels: 2
+  # Spatial momenta in GeV use the same scale as projective GATr
+  projective_coordinates: [px, py, pz]
+  projective_input_scale: 0.01
+
+preprocessing:
+  # Raw features, common projective_input_scale on px,py,pz [GeV]
+  # Scale enters both token embedding and distance attention
+  # Other feature channels stay raw, no per-axis z-scores
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

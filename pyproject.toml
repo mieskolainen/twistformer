@@ -1,0 +1,52 @@
+# Experiment configuration
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+[build-system]
+requires = ["setuptools>=84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "twistformer"
+dynamic = ["version"]
+description = "Set and geometric learning with driver plug-ins"
+requires-python = ">=3.13"
+dependencies = ["torch>=2.14.1", "numpy>=2.5.3", "PyYAML>=6.0.3", "matplotlib>=3.11.2", "tqdm>=4.70.1"]
+
+[project.optional-dependencies]
+toptag = ["h5py>=3.16.0", "hdf5plugin>=7.1.0"]
+tau3_classification = ["uproot>=5.7.7", "awkward>=2.14.0"]
+tau3_regression = ["uproot>=5.7.7", "awkward>=2.14.0"]
+pi0gamma = ["uproot>=5.7.7", "awkward>=2.14.0"]
+xgboost = ["xgboost>=2.1"]
+test = ["pytest>=9.1.1"]
+onnx = ["onnx>=1.20", "onnxscript>=0.5", "onnxruntime>=1.23"]
+flow = ["POT>=0.9.5", "scipy>=1.14"]
+flow-images = ["torchvision"]
+flow-graph = ["torch-geometric>=2.6"]
+flow-data = ["pandas>=2.2", "h5py>=3.16.0", "uproot>=5.7.7", "awkward>=2.14.0"]
+
+[project.scripts]
+twistformer-train = "twistformer.cli.train:main"
+twistformer-evaluate = "twistformer.cli.evaluate:main"
+twistformer-calibrate = "twistformer.cli.calibrate:main"
+twistformer-predict = "twistformer.cli.evaluate:predict"
+twistformer-export = "twistformer.cli.export:main"
+twistformer-flow = "twistformer.cli.flow:main"
+twistformer-import-flow = "twistformer.cli.import_flow:main"
+twistboard = "twistboard.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["twistformer*", "twistboard*", "drivers", "drivers.*"]
+exclude = ["old*", "build*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "twistformer.__version__"}
+
+[tool.setuptools.package-data]
+twistboard = ["static/*"]
+"twistformer.geometry" = ["native/*.cc", "native/*.hh", "native/*.txt", "native/README.md"]
+"twistformer.flows" = ["MIT-LICENSE", "licenses/*", "source_manifest.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

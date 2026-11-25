@@ -1,0 +1,24 @@
+# Geometric-algebra transformer steering
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: gatr_projective.yml
+model:
+  gatr_algebra: lorentz
+  gatr_input: p4
+  gatr_input_scale: 0.1
+  # Keep uncentered momentum components
+  gatr_center: false
+  auxiliary_features: []
+  gatr_spurions: frame  # none, time, beam, beam_plane or frame
+
+task:
+  lossfunc: cross_entropy
+  balance_classes: true
+
+preprocessing:
+  # Geometry uses separate p4 with one common gatr_input_scale
+  # No centering or per-component z-scores, no auxiliary features
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

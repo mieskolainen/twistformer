@@ -1,0 +1,20 @@
+# Top-tag evaluation bins in full input constituent kinematics
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+evaluation:
+  bootstrap_samples: 30
+  batch_size: 2048
+  efficiencies: [0.30, 0.50, 0.90]
+  
+  categories:
+    - name: jet_pt
+      observable: jet_pt
+      edges: [500, 600, 700, 800, 1000]
+      underflow: true
+      overflow: true
+    - name: jet_energy
+      observable: jet_energy
+      edges: [500, 750, 1000, 1500, 2000]
+      underflow: true
+      overflow: true

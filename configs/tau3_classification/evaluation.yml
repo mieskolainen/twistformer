@@ -1,0 +1,20 @@
+# Hadronic tau evaluation for 0pi0, 1pi0 and 2pi0 modes
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+evaluation:
+  bootstrap_samples: 30
+  batch_size: 2048
+  efficiencies: [0.30, 0.50, 0.90]
+
+  categories:
+    - name: visible_energy
+      observable: visible_energy
+      # Selected calorimeter deposit in GeV, after cuts and hit truncation
+      edges: [0, 0.5, 1, 2, 3, 4, 6]
+      overflow: true
+    - name: n_hits
+      observable: n_hits
+      # Calorimeter hits, with the max_hits cap isolated in overflow
+      edges: [0, 32, 64, 128, 192, 256]
+      overflow: true

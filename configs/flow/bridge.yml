@@ -1,0 +1,8 @@
+# Schrodinger bridge flow matching
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+flow:
+  path: S-BRIDGE
+  sigma: 0.2

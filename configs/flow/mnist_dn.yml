@@ -1,0 +1,10 @@
+# Paired image denoising
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: mnist.yml
+driver:
+  dataset: MNIST-DN
+  noise: 0.1
+flow:
+  mode: morph

@@ -1,0 +1,11 @@
+# Dependencies for the causal language benchmark
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+torch==2.15.0
+numpy==2.5.5
+PyYAML==6.0.4
+scipy==1.18.1
+transformers==5.23.0
+tokenizers==0.23.3
+xgboost==3.4.1

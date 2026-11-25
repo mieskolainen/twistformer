@@ -1,0 +1,10 @@
+# Colour image generation
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: mnist.yml
+driver:
+  dataset: CIFAR10
+  shape: [3, 32, 32]
+flow:
+  shape: [3, 32, 32]

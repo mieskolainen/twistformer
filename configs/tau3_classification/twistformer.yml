@@ -1,0 +1,46 @@
+# Tau decay classification with detector and twistor energy-flow branches
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+
+model:
+  family: twistformer
+  twistor_detector: true
+  # Each branch has this width and depth
+  width: 32
+  heads: 4
+  depth: 5
+  expansion: 2
+  norm: rms
+  dropout: 0.01
+  twistor_kind: penrose
+  # Condition in float64, then use float32 pair geometry and transport
+  twistor_precision: float32
+  three_point: false
+  pair_channels: 16
+  representation_channels: 4
+  geometry_update: true
+  twistor_qk: true
+  twistor_geometry_scale: 0.1
+  twistor_representation_scale: 0.1
+  twistor_residual_scaling: depth
+  twistor_transport: phase
+  reference_token: frame  # none, event, beam, time, beam_plane or frame
+  pooling: mean
+  head_widths: [64, 32]
+  head_residual: true
+  head_activation: gelu
+  head_norm: rms
+training:
+  learning_rate: 0.0003
+  scheduler: none
+  warmup_epochs: 0
+preprocessing:
+  # Train-hit z-scores for x,y,z,E in the detector branch
+  # Twistor branch uses separate unstandardized p4 proxies
+  # Twistors use event-metric projective normalization
+  # Base scalars are log(1+p_i^2), log(1+p_i.P), log(N), P=sum(p_i)
+  normalize_features: true
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

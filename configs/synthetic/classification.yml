@@ -1,0 +1,29 @@
+# Experiment configuration
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: synthetic
+  signal_class: 1  # low 0, high 1
+  train_size: 256
+  val_size: 64
+  test_size: 64
+model:
+  family: transformer
+  width: 32
+  heads: 4
+  depth: 2
+task:
+  name: classification
+  lossfunc: cross_entropy
+  balance_classes: true
+preprocessing:
+  normalize_features: true
+  normalize_targets: true
+training:
+  epochs: 10
+  batch_size: 32
+  learning_rate: 0.001
+evaluation:
+  bootstrap_samples: 30
+  batch_size: 2048

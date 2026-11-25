@@ -1,0 +1,13 @@
+# Top tagging with weighted angular flow graphs through thirteen edges
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: [common.yml, ../twistgraph.yml]
+
+driver:
+  feature_set: moment_graphs
+  compile_graphs: true
+  rotate: false
+
+training:
+  augmentation: none

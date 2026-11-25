@@ -1,0 +1,11 @@
+# MINIBOONE tabular density
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: discrete.yml
+driver:
+  dataset: MINIBOONE
+  root: data/flow
+  shape: [43]
+flow:
+  shape: [43]

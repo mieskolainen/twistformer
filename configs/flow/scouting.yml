@@ -1,0 +1,31 @@
+# Conditional scouting jet density
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: scouting
+  files: [data/scouting/*.root]
+  tree: Events
+  mode: jet
+task:
+  name: flow_matching
+  lossfunc: flow_matching
+flow:
+  mode: conditional
+  condition: parameters
+  shape: [3]
+  network: lzmlp
+  width: 64
+  depth: 4
+  steps: 32
+  matching_loss: momentum
+training:
+  epochs: 100
+  batch_size: 256
+  eval_batch_size: 128
+evaluation:
+  bootstrap_samples: 0
+  categories:
+    - name: pt
+      observable: pt
+      edges: [15, 30, 60, 120, 250, 7500]

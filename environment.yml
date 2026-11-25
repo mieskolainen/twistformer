@@ -1,0 +1,10 @@
+# Python 3.13 environment
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+name: twistformer
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip=26.2.1

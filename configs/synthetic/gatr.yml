@@ -1,0 +1,18 @@
+# Geometric-algebra transformer smoke training
+# GATr: https://arxiv.org/abs/2305.18415
+# E/P/C-GATr: https://arxiv.org/abs/2311.04744
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: classification.yml
+model:
+  family: gatr
+  gatr_algebra: projective
+  gatr_spurions: none  # none or frame
+  gatr_mv_channels: 4
+  gatr_global_token: true
+  pooling: mean
+
+task:
+  lossfunc: cross_entropy
+  balance_classes: true

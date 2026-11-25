@@ -1,0 +1,18 @@
+# Geometric-algebra transformer steering
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: gatr_projective.yml
+model:
+  gatr_algebra: euclidean
+  gatr_input_scale: 0.001
+  # Keep the detector origin
+  gatr_center: false
+
+preprocessing:
+  # Raw x,y,z [mm], common gatr_input_scale before algebra embedding
+  # No per-axis z-scores, auxiliary E stays raw in GeV
+  normalize_features: false
+  # Train-event z-scores for each of px,py,pz [GeV] and dx,dy,dz [mm]
+  # Inverse prediction restores means and widths to physical units
+  normalize_targets: true

@@ -1,0 +1,9 @@
+# Joint scouting dijet calibration
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: scouting.yml
+driver:
+  mode: dijet
+flow:
+  shape: [6]

@@ -1,0 +1,23 @@
+# Image flow matching
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+driver:
+  dataset: MNIST
+  root: data/flow
+  shape: [1, 28, 28]
+flow:
+  shape: [1, 28, 28]
+  network: unet
+  width: 32
+  depth: 1
+  evaluation_samples: 1
+training:
+  batch_size: 64
+  eval_batch_size: 16
+preprocessing:
+  normalize_targets: false
+  flow_transforms:
+    - name: logit
+      alpha: 0.00001

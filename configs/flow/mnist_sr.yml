@@ -1,0 +1,10 @@
+# Conditional image super-resolution
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: mnist.yml
+driver:
+  dataset: MNIST-SR
+flow:
+  mode: conditional
+  condition: image

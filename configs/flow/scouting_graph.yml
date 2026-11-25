@@ -1,0 +1,9 @@
+# Graph-conditioned scouting jet calibration
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: scouting.yml
+driver:
+  mode: graph
+flow:
+  condition: graph

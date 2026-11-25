@@ -1,0 +1,89 @@
+# Common tau3 momentum and displacement regression
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: evaluation.yml
+
+driver:
+  name: tau3_regression
+  files:
+    - /eos/experiment/drd/drd6/allegro/noble-liquid-cal-rnd/simulation_output/tau_studies/taupi-.ALLEGRO.im.root
+    - /eos/experiment/drd/drd6/allegro/noble-liquid-cal-rnd/simulation_output/tau_studies/taupi-pi0.ALLEGRO.sim.root
+    - /eos/experiment/drd/drd6/allegro/noble-liquid-cal-rnd/simulation_output/tau_studies/taupi-2pi0.ALLEGRO.sim.root
+  tree: events
+  split: [0.70, 0.15, 0.15]
+  seed: 101
+  
+  # ROOT events per read chunk
+  chunk_size: 20000
+  max_events: 500000
+
+  # -------------------------------------------
+  min_energy: 0.0003
+  eta_max: 0.9
+
+  # Apply min_energy, then retain the highest-energy hits
+  max_hits: 1024
+  # -------------------------------------------
+
+  input_mode: sim
+  weight_branch: null
+
+  # Raw hit r [mm] and E [GeV] give p4=(E,E*(r-r0)/|r-r0|)
+  # Null energy-flow proxy, not a measured particle four-momentum
+  momentum_proxy: true
+  proxy_origin: [0.0, 0.0, 0.0]
+
+task:
+  name: gaussian_regression
+  lossfunc: gaussian_nll
+  # Targets are detector-frame components, not a covariant vector head
+  mixture_components: 5
+  # Width floor in standardized target units when normalize_targets=true
+  min_std: 0.02
+
+model:
+  checkpoint_blocks: true
+
+training:
+  epochs: 100
+  max_steps: 0
+  batch_size: 256
+  eval_batch_size: 256
+  learning_rate: 0.0003
+  optimizer: adamw
+  optimizer_betas: [0.9, 0.98]
+  optimizer_eps: 1.0e-08
+  weight_decay: 0.01
+  decay_norm_bias: false
+  scheduler: cosine
+  scheduler_interval: epoch
+  warmup_epochs: 3
+  min_learning_rate: 0.0
+  grad_clip: 1.5
+  
+  # Gradient accumulation
+  accumulation: 1
+  
+  token_dropout: 0.01
+  token_min_keep: 1
+  workers: 1
+  pin_memory: true
+  prefetch_factor: 4
+  eval_prefetch_factor: 2
+  seed: 101
+  device: cuda
+
+  amp: true
+  amp_dtype: bf16
+  tf32: true
+  compile: true
+  compile_mode: default
+  compile_dynamic: true
+  
+  patience: 0
+  save_every: 1
+  keep_checkpoints: 0
+  monitor: val_loss
+  mode: min
+  fused_optimizer: false

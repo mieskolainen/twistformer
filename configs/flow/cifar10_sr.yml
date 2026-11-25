@@ -1,0 +1,10 @@
+# Conditional colour image super-resolution
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: cifar10.yml
+driver:
+  dataset: CIFAR10-SR
+flow:
+  mode: conditional
+  condition: image

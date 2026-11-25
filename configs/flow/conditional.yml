@@ -1,0 +1,10 @@
+# Class-conditional spiral density
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+driver:
+  dataset: two-spirals
+flow:
+  mode: conditional
+  condition: parameters

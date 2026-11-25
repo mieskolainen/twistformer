@@ -1,0 +1,12 @@
+# Rational-quadratic density estimation
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+task:
+  name: flow_nll
+  lossfunc: flow_nll
+flow:
+  type: discrete
+  coupling: rqs
+  layers: 4

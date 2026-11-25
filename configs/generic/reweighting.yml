@@ -1,0 +1,35 @@
+# Density reweighting classifier for matching event kinematics
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: observables
+  source:
+    name: generic
+    files:
+      train: data/train.npz
+      val: data/val.npz
+      test: data/test.npz
+    features: [feature_0, feature_1]
+    global_features: [pt, rapidity]
+    global_units: [GeV, ""]
+    outputs: [background, signal]
+    signal_class: 1
+  variables: ["global:pt", "global:rapidity"]
+
+model:
+  family: transformer
+  width: 32
+  depth: 2
+  heads: 4
+task:
+  name: classification
+  lossfunc: cross_entropy
+  balance_classes: true
+  label_smoothing: 0.0
+training:
+  epochs: 50
+  batch_size: 256
+
+evaluation:
+  bootstrap_samples: 30

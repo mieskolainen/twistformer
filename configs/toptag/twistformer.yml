@@ -1,0 +1,59 @@
+# Top tagging candidate with complex64 geometry and BF16 scalar layers
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+
+driver:
+  weight_column: null
+
+model:
+  family: twistformer
+  width: 48
+  heads: 4
+  depth: 5
+  expansion: 4
+  dropout: 0.025
+  attention_dropout: 0.0
+  norm: rms
+  ffn_activation: gelu
+  twistor_separate_norm: true
+  twistor_kind: penrose
+  twistor_precision: float32
+  three_point: true
+  pair_channels: 32
+  representation_channels: 8
+  geometry_update: true
+  twistor_qk: true
+  twistor_geometry_scale: 0.1
+  twistor_representation_scale: 0.1
+  twistor_residual_scaling: depth
+  auxiliary_features: []
+  twistor_transport: frame
+  # Compare beam against event with the same training budget
+  reference_token: event
+  pooling: pma
+  pooling_queries: 2
+  pooling_heads: 4
+  head_widths: [128, 64]
+  head_residual: true
+  head_activation: silu
+  head_norm: rms
+preprocessing:
+  # No detector branch or auxiliary features, feature tensor is unused
+  # Twistor branch uses separate physical p4 in GeV
+  # Twistors use event-metric projective normalization
+  # Base scalars are log(1+p_i^2), log(1+p_i.P), log(N), P=sum(p_i)
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false
+  normalize_globals: true
+training:
+  ema: false
+  workers: 4
+  device: cuda
+  fused_optimizer: true
+  tf32: true
+  compile_mode: default
+  save_every: 5
+  keep_checkpoints: 3

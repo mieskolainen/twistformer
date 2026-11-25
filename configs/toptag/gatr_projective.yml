@@ -1,0 +1,45 @@
+# Geometric-algebra transformer steering
+# GATr: https://arxiv.org/abs/2305.18415
+# E/P/C-GATr: https://arxiv.org/abs/2311.04744
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+driver:
+  weight_column: null
+
+model:
+  family: gatr
+  gatr_algebra: projective
+  width: 64
+  gatr_mv_channels: 8
+  heads: 4
+  depth: 4
+  expansion: 2
+  dropout: 0.05
+  attention_dropout: 0.0
+  gatr_input: p4
+  gatr_input_scale: 0.01
+  # Keep uncentered momentum components
+  gatr_center: false
+  gatr_spurions: none  # none or frame
+  gatr_projective_improved: true
+  gatr_reinsert: true
+  gatr_multi_query: true
+  gatr_global_token: true
+  gatr_checkpoint: true
+  gatr_readout: invariant
+  auxiliary_features:
+  - E
+  pooling: mean
+  head_norm: rms
+  head_widths:
+  - 64
+  head_activation: gelu
+preprocessing:
+  # Spatial p4 components [GeV] use one common gatr_input_scale
+  # No per-axis z-scores, auxiliary E stays raw in GeV
+  # Euclidean spatial geometry does not impose Lorentz symmetry
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

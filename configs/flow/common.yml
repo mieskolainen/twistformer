@@ -1,0 +1,33 @@
+# Shared flow training
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: flow
+  dataset: gaussians
+  shape: [2]
+  train_size: 4096
+  val_size: 1024
+  test_size: 1024
+task:
+  name: flow_matching
+  lossfunc: flow_matching
+flow:
+  type: continuous
+  shape: [2]
+  width: 64
+  depth: 3
+  path: CFM
+  steps: 32
+  trace: hutchinson
+  trace_samples: 4
+training:
+  epochs: 50
+  batch_size: 256
+  eval_batch_size: 128
+  learning_rate: 0.001
+  scheduler: cosine
+  save_every: 5
+  device: auto
+evaluation:
+  bootstrap_samples: 0

@@ -1,0 +1,11 @@
+# BSDS300 tabular density
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: discrete.yml
+driver:
+  dataset: BSDS300
+  root: data/flow
+  shape: [63]
+flow:
+  shape: [63]

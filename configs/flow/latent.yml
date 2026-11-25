@@ -1,0 +1,9 @@
+# Latent-space flow matching
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+flow:
+  space: latent
+  latent_dim: 2
+  codec: vae

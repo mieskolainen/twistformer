@@ -1,0 +1,76 @@
+# Common top-tagging data and training
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: evaluation.yml
+
+driver:
+  name: toptag
+  signal_class: 1  # QCD 0, top 1
+  files:
+    train: zenodo_2603256/train.h5
+    val: zenodo_2603256/val.h5
+    test: zenodo_2603256/test.h5
+
+  # Keep up to max constituents with the highest pT
+  max_particles: 120
+  max_events: -1
+  seed: 101
+  feature_set: p4
+  
+  # Training-only random rotation about the beam axis, rebuild features from p4
+  rotate: true
+
+task:
+  name: classification
+  lossfunc: cross_entropy
+  balance_classes: true
+  class_weights: []
+  label_smoothing: 0.0
+
+training:
+  epochs: 35
+  batch_size: 128
+  eval_batch_size: 2048
+  learning_rate: 0.0003
+  optimizer: adamw
+  optimizer_betas:
+  - 0.9
+  - 0.999
+  optimizer_eps: 1.0e-08
+  weight_decay: 0.01
+  decay_norm_bias: true
+  scheduler: cosine
+  min_learning_rate: 0.0
+  warmup_epochs: 3
+  restart_period: 4
+  restart_mult: 2
+  decay_epochs: 3
+  decay_gamma: 0.5
+  grad_clip: 5.0
+  
+  # Gradient accumulation
+  accumulation: 1
+  
+  token_dropout: 0.01
+  token_min_keep: 1
+  workers: 1
+  pin_memory: true
+  prefetch_factor: 4
+  eval_prefetch_factor: 2
+  seed: 101
+  device: auto
+  
+  amp: true
+  amp_dtype: bf16
+  tf32: false
+  compile: false
+  compile_mode: reduce-overhead
+  compile_dynamic: true
+  
+  patience: 0
+  save_every: 1
+  keep_checkpoints: 0
+  monitor: val_loss
+  mode: min
+  fused_optimizer: false

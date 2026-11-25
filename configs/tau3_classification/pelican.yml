@@ -1,0 +1,34 @@
+# Tau decay classification with detector-aware PELICAN pairs
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+
+model:
+  family: pelican
+  width: 64
+  heads: 4
+  depth: 4
+  norm: rms
+  dropout: 0.01
+  pelican_message_width: 64
+  pelican_activation: leaky_relu
+  # Nominal hit count for learned multiplicity scaling
+  pelican_average_nobj: 128.0
+  pelican_momentum_scale: 0.1
+  pelican_factorize: true
+  pelican_multiplicity: true
+  pelican_triangle: false
+  # Detector coordinates retain frame dependence in the pair channels
+  auxiliary_features: [x, y, z, E]
+  head_norm: rms
+  head_widths: [64]
+  head_activation: gelu
+  head_dropout: 0.01
+preprocessing:
+  # Train-hit z-scores for auxiliary x,y,z,E, detector-frame dependent
+  # Separate p4 proxies retain their physical components
+  # Gram_ij = s^2 (E_i E_j - vecp_i.vecp_j), s=pelican_momentum_scale
+  normalize_features: true
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

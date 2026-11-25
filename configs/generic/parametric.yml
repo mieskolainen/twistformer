@@ -1,0 +1,29 @@
+# Classification conditioned on an external mass hypothesis
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: generic
+  files:
+    train: data/train.npz
+    val: data/val.npz
+    test: data/test.npz
+  features: [feature_0, feature_1]
+  outputs: [background, signal]
+  signal_class: 1
+  parameters: [mass]
+  parameter_units: [GeV]
+model:
+  family: transformer
+  parameter_fusion: tokens
+task:
+  name: classification
+  lossfunc: cross_entropy
+  balance_classes: true
+preprocessing:
+  normalize_parameters: true
+training:
+  epochs: 50
+
+evaluation:
+  bootstrap_samples: 30

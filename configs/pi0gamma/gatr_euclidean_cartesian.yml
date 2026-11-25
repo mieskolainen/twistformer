@@ -1,0 +1,8 @@
+# Euclidean GATr with local Cartesian shower coordinates
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: gatr_euclidean_angular.yml
+
+driver:
+  feature_mode: cartesian

@@ -1,0 +1,11 @@
+# Transformer with four angular shower features
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: transformer_extended.yml
+
+driver:
+  feature_mode: angular
+
+preprocessing:
+  normalize_features: false

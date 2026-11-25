@@ -1,0 +1,175 @@
+# Neutral pion and photon ECAL classification
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: evaluation.yml
+
+driver:
+  name: pi0gamma
+
+  # 'leading_cluster' uses only the cells assigned to that cluster by reconstruction
+  # 'leading_cluster_cone' collects all positioned barrel ECAL cells within cone_half_angle of the cluster direction
+
+  input_mode: leading_cluster_cone
+  feature_mode: extended  # extended, angular or cartesian
+  
+  seed: 101  # Event split seed shared by all model cards
+  max_events: 500000
+  
+  # Shower totals after cell cuts and before max_cells, [] disables both
+  global_features: [log_n_cells, log_sum_energy]
+  base_path: /eos/experiment/drd/drd6/allegro/noble-liquid-cal-rnd/simulation_output/geometry_studies/ALLEGRO_allstrips/reco/base/theta40to140/
+  files:
+    - pi0_*GeV_*_reco.root
+    - gamma_*GeV_*_reco.root
+  
+  class_names: [pi0, gamma] # [background 0, signal 1]
+  class_pdgs:  [111, 22]
+  signal_class: 1
+  
+  # Train, validate, test split
+  split: [0.75, 0.1, 0.15]
+  independent_energy_splits: true
+  
+  tree: events
+  clusters: AugmentedEMBCaloClusters
+  cells: null        # Cone mode reads ECalBarrelModuleThetaMergedPositioned
+  cluster_hits: null # null selects _AugmentedEMBCaloClusters_hits automatically
+
+  # ------------------------------------------
+  # CUTS
+
+  # Cell-level cuts
+  min_energy: 0.0003   # Cell E >= min_energy [GeV], noise cut
+  min_cells: 1         # Apply cuts, sort by descending energy, then cap, null keeps all passing cells
+  max_cells: 1200      # Max cell inside the cone (to keep quadratic computations tractable)
+
+  # 3D angle from the leading reconstructed cluster axis [rad]
+  cone_half_angle: 0.30
+  
+  # Excludes highly energy asymmetric decays (for comparison with other work etc.) 
+  max_pi0_decay_asymmetry: 0.9  # |E1-E2| / (E1+E2) < A (set null for no cut)
+  
+  # MC gen photon theta bounds, both pion daughters must pass
+  # Barrel corner at r = 2100 mm and |z| = 2350 mm, null disables the cut
+  photon_theta_range_deg: [42.0, 138.0]
+  # ------------------------------------------
+  
+  # MC primary E [GeV], one bin per gun energy: 5, 10, 20, 35, 50, 80, 100
+  # Interior edges are midpoints between gun energies
+  energy_edges: [0, 7.5, 15, 27.5, 42.5, 65, 90, 120]
+  
+  # Relative gun energy weights, normalized to unit sum by the reader
+  # The plot has no visible yield above 90 GeV
+  #energy_weights: [0.261, 0.261, 0.243, 0.142, 0.080, 0.013, 0.000]
+  energy_weights: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+  
+  # Uproot reader events per read chunk
+  chunk_size: 2000
+  root_workers: 8  # ROOT reader processes per rank, 0 uses all available logical CPUs
+  weight_branch: null
+
+  # Single-primary gun labels use MCParticles only
+  # Normal events require link_cell, link_particle and link_weight branches
+  truth_links: false
+  branches: {}
+
+  # Key4hep k4geo 4013b50b4b951f6ec0ebff1c941ce02be0df4a2c
+  # ALLEGRO_o1_v03 ECAL, also included by ALLEGRO_o1_v04
+  # FCCee/ALLEGRO/compact/ALLEGRO_o1_v03/ECalBarrel_thetamodulemerged.xml
+  geometry:
+
+    # Active ECAL inner face, EMBarrel_rmin = 2100 + 49 + 10 + 3.8 + 10 mm
+    inner_radius_mm: 2172.8
+
+    # Unmerged theta pitch and module pitch 2*pi/1536
+    theta_pitch_rad: 0.00245436925
+    phi_pitch_rad:   0.0040906154343617095
+
+    # Centre of any unmerged theta strip, in radians
+    theta_offset_rad: 0.5902785
+    
+    # system:4,cryo:1,type:3,subtype:3,layer:8,module:11,theta:10
+    layer_shift: 11
+    layer_bits: 8
+
+    # One positive merge count per decoded layer, starting at layer zero
+    theta_merge: [4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+    phi_merge:   [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+  # ----------------------------------------------
+
+task:
+  name: classification
+  lossfunc: cross_entropy
+  balance_classes: true
+
+model:
+  global_fusion: readout
+
+preprocessing:
+
+  # Extended features already use 50 mm lengths and log energy
+  normalize_features: false
+  normalize_globals: true
+  normalize_targets: false
+
+plots:
+  feature_distributions:
+    bins: 48  # XGBoost input histograms, 0 disables them
+    categories:
+      - name: truth_energy
+        observable: truth_energy
+        edges: driver.energy_edges  # A list of bin edges also works
+
+training:
+  epochs: 50
+  batch_size: 256              # optimal depends on overal training stats
+  eval_batch_size: 256
+  learning_rate: 3.0e-4        # optimal depends on overal training stats
+  optimizer: adamw             # adamw, muon_adamw
+  optimizer_betas: [0.9, 0.98]
+  optimizer_eps: 1.0e-08
+  weight_decay: 1e-2
+  decay_norm_bias: false
+  grad_clip: 2.0               # stability
+  
+  # scheduler: cosine
+  # scheduler_interval: epoch
+  # warmup_epochs: 3
+  # min_learning_rate: 0.0
+
+  scheduler: plateau
+  scheduler_interval: epoch
+  warmup_epochs: 3
+  min_learning_rate: 0.0
+  plateau_factor: 0.5
+  plateau_patience: 3
+
+  # Gradient accumulation
+  # (use a larger effective batch when GPU memory is limited)
+  accumulation: 1
+  
+  # Driver augmentation: dataset, online or none
+  augmentation: dataset
+
+  # Token dropout is applied in the training loop
+  token_dropout: 0.05
+  workers: 1
+  pin_memory: true
+  prefetch_factor: 4
+  eval_prefetch_factor: 2
+  seed: 101  # Python, NumPy, Torch and XGBoost training seed
+  device: cuda
+  
+  amp: true
+  amp_dtype: bf16
+  tf32: true
+  compile: true # turn off if fails
+  compile_mode: default
+  compile_dynamic: true # true for variable shapes, false for fixed shapes, null for automatic
+
+  save_every: 1
+  keep_checkpoints: 0
+  monitor: val_loss
+  mode: min
+  fused_optimizer: false

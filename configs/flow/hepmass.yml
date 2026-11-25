@@ -1,0 +1,11 @@
+# HEPMASS tabular density
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: discrete.yml
+driver:
+  dataset: HEPMASS
+  root: data/flow
+  shape: [21]
+flow:
+  shape: [21]

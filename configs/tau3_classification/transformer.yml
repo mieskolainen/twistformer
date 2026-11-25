@@ -1,0 +1,41 @@
+# Experiment configuration
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+
+model:
+  family: transformer
+  attention: standard
+  pair_bias: none
+  reference_token: frame  # none or frame
+  width: 64
+  heads: 4
+  depth: 6
+  expansion: 2
+  norm: rms
+  embedding: [64, 64, 128]
+  embedding_norm: layer
+  ffn_activation: geglu
+  ffn_norm: layer
+  head_norm: rms
+  head_layers: 3
+  head_expansion: 2
+  head_residual: true
+  head_dropout: 0.01
+  head_zero_init: true
+  dropout: 0.01
+  embedding_dropout: 0.01
+  residual_dropout: 0.01
+  attention_dropout: 0.0
+  pooling: mean
+training:
+  learning_rate: 0.0003
+  scheduler: none
+  warmup_epochs: 0
+preprocessing:
+  # Train-hit z-scores for each of x,y,z [mm] and E [GeV]
+  # Separate p4 is unchanged and unused with pair_bias=none
+  normalize_features: true
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false

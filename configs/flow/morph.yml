@@ -1,0 +1,9 @@
+# Source-to-target distribution transport
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+driver:
+  dataset: gaussians-to-moons
+flow:
+  mode: morph-shuffle

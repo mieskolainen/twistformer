@@ -1,0 +1,11 @@
+# Continuous likelihood training
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml
+task:
+  name: flow_nll
+  lossfunc: flow_nll
+flow:
+  trace: exact
+  steps: 16

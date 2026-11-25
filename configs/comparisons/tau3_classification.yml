@@ -1,0 +1,23 @@
+# Tau classifiers on common detector events
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: ../tau3_classification/evaluation.yml
+
+comparison:
+  name: tau3_classification_models
+  dataset:
+    reference_checkpoint: runs/tau3-transformer-classification/checkpoints/best.pt
+    split: test
+  models:
+    - label: Transformer
+      checkpoint: runs/tau3-transformer-classification/checkpoints/best.pt
+    - label: Twistformer
+      checkpoint: runs/tau3-twistformer-classification/checkpoints/best.pt
+    - label: P-GATr
+      checkpoint: runs/tau3-gatr-projective-classification/checkpoints/best.pt
+  reference_model: Transformer
+  device: auto
+  bootstrap_samples: 30
+  bootstrap_seed: 101
+  plots: true

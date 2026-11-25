@@ -1,0 +1,74 @@
+# L-GATr top tagging without pre-training
+# L-GATr: https://arxiv.org/abs/2405.14806
+# Training recipe: https://arxiv.org/abs/2411.00446, Tables 3 and 9
+# Code: https://github.com/heidelberg-hepml/lorentz-gatr
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: gatr_projective.yml
+driver:
+  # Keep up to 200 constituents with the highest pT, unlike the 80-token cards
+  max_particles: 200
+  # No random azimuthal rotation during training
+  rotate: false
+model:
+  gatr_algebra: lorentz
+  width: 32
+  gatr_mv_channels: 16
+  heads: 8
+  depth: 12
+  expansion: 2
+  dropout: 0.0
+  attention_dropout: 0.0
+  final_norm: false
+  gatr_input: p4
+  # Four-momenta in units of 20 GeV, no centering or feature standardization
+  gatr_input_scale: 0.05
+  # Keep uncentered momentum components
+  gatr_center: false
+  auxiliary_features: []
+  # Add one xy-plane bivector and one unit time vector to each jet
+  gatr_spurions: beam_plane
+  gatr_reference_tokens: true
+  gatr_global_token: true
+  gatr_readout: logits
+  gatr_lorentz_proper: true
+  gatr_multi_query: false
+  gatr_attention_ratio: 2
+  gatr_reinsert: false
+  gatr_head_scale: false
+  gatr_bilinear_norm: true
+  gatr_norm_epsilon: 0.01
+  gatr_residual_scaling: false
+  # Scalar GELU and multivector scalar-gated GELU
+  ffn_activation: gelu
+  head_norm: none
+  head_widths: []
+preprocessing:
+  # Geometry uses separate p4 with one common gatr_input_scale
+  # No centering or per-component z-scores, no auxiliary features
+  normalize_features: false
+  # Classification uses integer class labels, this switch has no effect
+  normalize_targets: false
+training:
+  # Epoch cap, training stops at 200000 successful optimizer updates
+  epochs: 100
+  max_steps: 200000
+  batch_size: 128
+  eval_batch_size: 2048
+  optimizer: lion
+  optimizer_betas: [0.9, 0.999]
+  learning_rate: 0.0003
+  weight_decay: 0.2
+  decay_norm_bias: true
+  scheduler: cosine
+  scheduler_interval: step
+  min_learning_rate: 0.0
+  warmup_epochs: 0
+  accumulation: 1
+  grad_clip: 5.0
+  token_dropout: 0.0
+  amp: false
+  tf32: false
+  patience: 0
+  ema: false

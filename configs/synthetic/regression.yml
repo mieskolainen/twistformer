@@ -1,0 +1,27 @@
+# Experiment configuration
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: synthetic
+  train_size: 512
+  val_size: 128
+  test_size: 128
+model:
+  family: transformer
+  width: 32
+  depth: 2
+task:
+  name: gaussian_regression
+  lossfunc: gaussian_nll
+  min_std: 0.001
+preprocessing:
+  normalize_features: true
+  normalize_targets: true
+training:
+  epochs: 20
+  batch_size: 32
+  learning_rate: 0.001
+evaluation:
+  bootstrap_samples: 30
+  batch_size: 2048

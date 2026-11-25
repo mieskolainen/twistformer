@@ -1,0 +1,26 @@
+# Experiment configuration
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+driver:
+  name: generic
+  files:
+    train: data/train.npz
+    val: data/val.npz
+    test: data/test.npz
+  features: [feature_0, feature_1]
+  outputs: [response]
+  target_units: [arb]
+model:
+  family: transformer
+task:
+  name: gaussian_regression
+  lossfunc: gaussian_nll
+preprocessing:
+  normalize_features: true
+  normalize_targets: true
+training:
+  epochs: 50
+evaluation:
+  bootstrap_samples: 30
+  batch_size: 2048

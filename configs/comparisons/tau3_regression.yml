@@ -1,0 +1,23 @@
+# Tau regression models on common physical targets
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: ../tau3_regression/evaluation.yml
+
+comparison:
+  name: tau3_regression_models
+  dataset:
+    reference_checkpoint: runs/tau3-transformer-regression/checkpoints/best.pt
+    split: test
+  models:
+    - label: Transformer
+      checkpoint: runs/tau3-transformer-regression/checkpoints/best.pt
+    - label: Twistformer
+      checkpoint: runs/tau3-twistformer-regression/checkpoints/best.pt
+    - label: L-GATr
+      checkpoint: runs/tau3-lgatr-regression/checkpoints/best.pt
+  reference_model: Transformer
+  device: auto
+  bootstrap_samples: 30
+  bootstrap_seed: 101
+  plots: true

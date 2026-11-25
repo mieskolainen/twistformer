@@ -1,0 +1,9 @@
+# Paired scouting jet transport
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: scouting.yml
+driver:
+  mode: morph
+flow:
+  mode: morph

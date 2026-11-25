@@ -1,0 +1,5 @@
+# Continuous density estimation
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: common.yml

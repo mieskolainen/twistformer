@@ -1,0 +1,8 @@
+# Binary class intervention
+#
+# mikael.mieskolainen@cern.ch (2026)
+
+include: conditional.yml
+flow:
+  mode: conditional-flip
+  flip_parameter: class
